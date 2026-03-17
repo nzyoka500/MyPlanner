@@ -42,9 +42,10 @@
 ```text
 MyPlanner/
 │
+├── images/       # screenshots
 ├── index.html    # Application structure and UI components
 ├── style.css     # Production-grade styling and responsive media queries
-├── script.js    # Core logic, state management, and event handling
+├── script.js     # Core logic, state management, and event handling
 └── README.md     # Documentation
 ```
 
