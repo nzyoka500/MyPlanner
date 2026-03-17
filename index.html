@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyPlanner | Productivity Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Google Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo">
+                <i class="fas fa-check-double"></i>
+                <span>MyPlanner</span>
+            </div>
+            <nav>
+                <button class="nav-btn active" data-filter="all"><i class="fas fa-th-large"></i> All Tasks</button>
+                <button class="nav-btn" data-filter="pending"><i class="fas fa-clock"></i> Pending</button>
+                <button class="nav-btn" data-filter="completed"><i class="fas fa-check-circle"></i> Completed</button>
+            </nav>
+            <div class="stats-card">
+                <h4>Progress</h4>
+                <div class="progress-container">
+                    <div class="progress-bar" id="progressBar"></div>
+                </div>
+                <p id="progressText">0% Completed</p>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header>
+                <h1>Welcome Back!</h1>
+                <p id="currentDate"></p>
+            </header>
+
+            <div class="grid-layout">
+                <!-- Task Input Section -->
+                <section class="input-section card">
+                    <h3><i class="fas fa-plus-circle"></i> Create New</h3>
+                    <form id="taskForm">
+                        <div class="form-group">
+                            <input type="text" id="taskTitle" placeholder="Task or Goal Title" required>
+                        </div>
+                        <div class="form-row">
+                            <input type="date" id="taskDate" required>
+                            <select id="taskPriority">
+                                <option value="low">Low</option>
+                                <option value="medium" selected>Medium</option>
+                                <option value="high">High</option>
+                            </select>
+                        </div>
+                        <div class="form-row">
+                            <select id="itemType">
+                                <option value="task">Daily Task</option>
+                                <option value="goal">Long-term Goal</option>
+                            </select>
+                            <button type="submit" class="btn-primary">Add to List</button>
+                        </div>
+                    </form>
+                </section>
+
+                <!-- Tasks List Section -->
+                <section class="list-section">
+                    <div class="section-header">
+                        <h3>Your Timeline</h3>
+                        <div class="filters">
+                            <span class="active-filter-text">Showing: All Items</span>
+                        </div>
+                    </div>
+                    <div id="taskList" class="task-grid">
+                        <!-- Tasks will be injected here -->
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- Edit Modal -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <h3>Edit Task</h3>
+            <input type="text" id="editTitle">
+            <div class="modal-actions">
+                <button onclick="closeModal()" class="btn-secondary">Cancel</button>
+                <button id="saveEdit" class="btn-primary">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
