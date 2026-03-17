@@ -1,7 +1,7 @@
 # MyPlanner
 
-**MyPlanner** is a high-performance productivity dashboard designed to help users manage daily tasks and long-term goals. 
-> Built with a  mindset, the application utilizes **Material Design 3 (M3)** principles to provide a premium user experience characterized by clean typography, glassmorphism, and intuitive micro-interactions.
+**MyPlanner** is a  productivity dashboard designed to help users manage daily tasks and long-term goals. 
+> Built with a `SaaS` mindset, the application utilizes **Material Design 3 (M3)** principles to provide a premium user experience characterized by clean typography, glassmorphism, and intuitive micro-interactions.
 
 <!-- Screen images -->
 ![MyPlanner Dashboad](/images/dashboard.png)
