@@ -1,3 +1,6 @@
+/* styles.css - Custom styling file */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap');
+
 /* Variable Definitions */
 :root {
   --primary: #6366f1;
@@ -250,15 +253,15 @@ body {
 }
 .High {
   background: #fee2e2;
-  color: #991b1b;
+  color: #8b1414;
 }
 .Medium {
   background: #fef3c7;
-  color: #92400e;
+  color: #aa490c;
 }
 .Low {
   background: #dcfce7;
-  color: #166534;
+  color: #177039;
 }
 
 /* Responsive Sidebar & Header */
@@ -424,6 +427,16 @@ input:focus {
   font-weight: 700;
   cursor: pointer;
 }
+.btn-secondary {
+  background: var(--error); 
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 12px;
+}
+
 .btn-danger-text {
   background: transparent;
   color: var(--error);
