@@ -1,34 +1,36 @@
 /**
- * MyPlanner Pro - Production State Logic
+ * MyPlanner Pro - Core Logic
+ * Handles State, CRUD, Search, and Modal Switching
  */
 
 let state = {
-    items: JSON.parse(localStorage.getItem('myplanner_v2_db')) || [],
+    items: JSON.parse(localStorage.getItem('myplanner_v3_db')) || [],
     filter: 'all',
     search: '',
     editingId: null
 };
 
+// --- Initialization ---
 document.addEventListener('DOMContentLoaded', () => {
     initApp();
     render();
 });
 
 function initApp() {
-    // Set current date
+    // 1. Display Current Date in Header
     const options = { weekday: 'long', month: 'short', day: 'numeric' };
     document.getElementById('headerDate').innerText = new Date().toLocaleDateString('en-US', options);
 
-    // Form submission
+    // 2. Form Submit Listener
     document.getElementById('taskForm').addEventListener('submit', handleFormSubmit);
 
-    // Real-time Search
+    // 3. Search Functionality
     document.getElementById('searchInput').addEventListener('input', (e) => {
         state.search = e.target.value.toLowerCase();
         render();
     });
 
-    // Keyboard Shortcut (/)
+    // 4. Keyboard Shortcut for Search (/)
     window.addEventListener('keydown', (e) => {
         if(e.key === '/' && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
             e.preventDefault();
@@ -37,7 +39,7 @@ function initApp() {
     });
 }
 
-// Sidebar Controls
+// --- Navigation & Sidebar ---
 function toggleSidebar() {
     document.getElementById('sideDrawer').classList.toggle('active');
     document.getElementById('sidebarOverlay').classList.toggle('active');
@@ -49,10 +51,135 @@ function handleNavClick(btn) {
     state.filter = btn.dataset.filter;
     document.getElementById('pageTitle').innerText = btn.querySelector('.nav-text').innerText;
     render();
+    // Auto-close sidebar on mobile
     if(window.innerWidth <= 1024) toggleSidebar();
 }
 
-// Rendering Core
+// --- Modal Mode Switching Logic ---
+/**
+ * This helper ensures only one part of the modal is visible
+ */
+function switchModalMode(mode) {
+    const viewModeEl = document.getElementById('viewMode');
+    const formModeEl = document.getElementById('taskForm');
+    
+    if (mode === 'form') {
+        viewModeEl.classList.add('hidden');
+        formModeEl.classList.remove('hidden');
+    } else {
+        viewModeEl.classList.remove('hidden');
+        formModeEl.classList.add('hidden');
+    }
+}
+
+function closeModal() {
+    document.getElementById('universalModal').style.display = 'none';
+    state.editingId = null;
+}
+
+// --- CRUD Actions ---
+
+/**
+ * Open Form for either CREATE or UPDATE
+ */
+function openFormModal(id = null) {
+    state.editingId = id;
+    switchModalMode('form');
+    
+    const formTitle = document.getElementById('formTitle');
+    const form = document.getElementById('taskForm');
+
+    if (id) {
+        // Edit Mode: Pre-fill data
+        const item = state.items.find(i => i.id === id);
+        formTitle.innerText = "Update Entry";
+        
+        document.getElementById('taskTitle').value = item.title;
+        document.getElementById('taskDesc').value = item.desc;
+        document.getElementById('taskDate').value = item.date;
+        document.getElementById('taskPriority').value = item.priority;
+        
+        // Handle Segmented Control (Radios)
+        if(item.type === 'Goal') {
+            document.getElementById('catGoal').checked = true;
+        } else {
+            document.getElementById('catTask').checked = true;
+        }
+    } else {
+        // Add Mode: Reset form
+        formTitle.innerText = "Add New Task";
+        form.reset();
+    }
+    
+    document.getElementById('universalModal').style.display = 'flex';
+}
+
+/**
+ * Open Modal in READ-ONLY View mode
+ */
+function openViewModal(id) {
+    const item = state.items.find(i => i.id === id);
+    state.editingId = id;
+    
+    switchModalMode('view');
+
+    // Populate the View details
+    document.getElementById('viewTitleText').innerText = item.title;
+    document.getElementById('viewDescText').innerText = item.desc || "No additional notes provided.";
+    document.getElementById('viewDateText').innerText = item.date;
+    document.getElementById('viewTypeText').innerText = item.type;
+    
+    const chip = document.getElementById('viewPriority');
+    chip.innerText = item.priority;
+    chip.className = `tag-priority ${item.priority}`;
+
+    // Link Action Buttons
+    document.getElementById('viewDeleteBtn').onclick = () => deleteItem(id);
+    document.getElementById('viewEditBtn').onclick = () => openFormModal(id);
+
+    document.getElementById('universalModal').style.display = 'flex';
+}
+
+function handleFormSubmit(e) {
+    e.preventDefault();
+    const data = {
+        title: document.getElementById('taskTitle').value,
+        desc: document.getElementById('taskDesc').value,
+        date: document.getElementById('taskDate').value,
+        priority: document.getElementById('taskPriority').value,
+        type: document.querySelector('input[name="itemType"]:checked').value
+    };
+
+    if(state.editingId) {
+        // Update existing
+        state.items = state.items.map(i => i.id === state.editingId ? {...i, ...data} : i);
+        notify("Planner updated");
+    } else {
+        // Create new
+        state.items.unshift({ id: Date.now(), ...data, completed: false });
+        notify("New task added");
+    }
+
+    sync();
+    closeModal();
+}
+
+function toggleStatus(id) {
+    state.items = state.items.map(i => i.id === id ? {...i, completed: !i.completed} : i);
+    sync();
+}
+
+function deleteItem(id) {
+    if(confirm("Permanently remove this entry?")) {
+        state.items = state.items.filter(i => i.id !== id);
+        sync();
+        closeModal();
+        notify("Deleted");
+    }
+}
+
+// --- UI Sync & Rendering ---
+
 function render() {
     const grid = document.getElementById('taskGrid');
     const emptyState = document.getElementById('emptyState');
@@ -68,19 +195,16 @@ function render() {
 
     if (filtered.length === 0) {
         emptyState.style.display = 'flex';
-        grid.style.display = 'none';
     } else {
         emptyState.style.display = 'none';
-        grid.style.display = 'grid';
-        
         filtered.forEach(item => {
             const card = document.createElement('div');
             card.className = `task-card ${item.completed ? 'done' : ''}`;
             card.innerHTML = `
                 <span class="tag-priority ${item.priority}">${item.priority}</span>
                 <h3 style="margin-bottom:8px">${item.title}</h3>
-                <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:1.5rem; line-height:1.4; height:2.8rem; overflow:hidden;">
-                    ${item.desc || 'No detailed notes provided.'}
+                <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:1.2rem; line-height:1.4; height:2.8rem; overflow:hidden;">
+                    ${item.desc || 'No details...'}
                 </p>
                 <div style="display:flex; justify-content:space-between; align-items:center;">
                     <div style="display:flex; align-items:center; gap:6px; font-size:0.75rem; color:var(--text-muted)">
@@ -88,7 +212,7 @@ function render() {
                         ${item.date}
                     </div>
                     <button class="status-btn" onclick="event.stopPropagation(); toggleStatus(${item.id})" 
-                            style="border:none; background:none; cursor:pointer;">
+                            style="border:none; background:none; cursor:pointer; display:flex;">
                         <span class="material-icons-round" style="color:${item.completed ? 'var(--primary)' : '#cbd5e1'}">
                             ${item.completed ? 'check_circle' : 'radio_button_unchecked'}
                         </span>
@@ -103,87 +227,8 @@ function render() {
     updateStats(filtered.length);
 }
 
-// CRUD Actions
-function handleFormSubmit(e) {
-    e.preventDefault();
-    const data = {
-        title: document.getElementById('taskTitle').value,
-        desc: document.getElementById('taskDesc').value,
-        date: document.getElementById('taskDate').value,
-        priority: document.getElementById('taskPriority').value,
-        type: document.querySelector('input[name="itemType"]:checked').value
-    };
-
-    if(state.editingId) {
-        state.items = state.items.map(i => i.id === state.editingId ? {...i, ...data} : i);
-        notify("Entry updated");
-    } else {
-        state.items.unshift({ id: Date.now(), ...data, completed: false });
-        notify("Task added successfully");
-    }
-
-    sync();
-    closeModal();
-}
-
-function toggleStatus(id) {
-    state.items = state.items.map(i => i.id === id ? {...i, completed: !i.completed} : i);
-    sync();
-    notify("Status updated");
-}
-
-function deleteItem(id) {
-    if(confirm("Permanently delete this item?")) {
-        state.items = state.items.filter(i => i.id !== id);
-        sync();
-        closeModal();
-        notify("Item removed");
-    }
-}
-
-// Modal Logic
-const modal = document.getElementById('universalModal');
-const vMode = document.getElementById('viewMode');
-const fMode = document.getElementById('taskForm');
-
-function openFormModal(id = null) {
-    state.editingId = id;
-    vMode.classList.add('hidden');
-    fMode.classList.remove('hidden');
-    if(id) {
-        const item = state.items.find(i => i.id === id);
-        document.getElementById('taskTitle').value = item.title;
-        document.getElementById('taskDesc').value = item.desc;
-        document.getElementById('taskDate').value = item.date;
-        document.getElementById('taskPriority').value = item.priority;
-    } else { fMode.reset(); }
-    modal.style.display = 'flex';
-}
-
-function openViewModal(id) {
-    const item = state.items.find(i => i.id === id);
-    state.editingId = id;
-    document.getElementById('viewTitleText').innerText = item.title;
-    document.getElementById('viewDescText').innerText = item.desc || "No additional notes.";
-    document.getElementById('viewDateText').innerText = item.date;
-    document.getElementById('viewTypeText').innerText = item.type;
-    const chip = document.getElementById('viewPriority');
-    chip.innerText = item.priority;
-    chip.className = `tag-priority ${item.priority}`;
-
-    document.getElementById('viewDeleteBtn').onclick = () => deleteItem(id);
-    document.getElementById('viewEditBtn').onclick = () => openFormModal(id);
-
-    fMode.classList.add('hidden');
-    vMode.classList.remove('hidden');
-    modal.style.display = 'flex';
-}
-
-function closeModal() { modal.style.display = 'none'; }
-
-// Helpers
 function sync() {
-    localStorage.setItem('myplanner_v2_db', JSON.stringify(state.items));
+    localStorage.setItem('myplanner_v3_db', JSON.stringify(state.items));
     render();
 }
 
@@ -194,7 +239,7 @@ function updateStats(filteredCount) {
     
     document.getElementById('progressBar').style.width = pct + '%';
     document.getElementById('progressValue').innerText = pct + '%';
-    document.getElementById('itemCountLabel').innerText = `${filteredCount} items matching criteria`;
+    document.getElementById('itemCountLabel').innerText = `${filteredCount} items total`;
 }
 
 function notify(msg) {
@@ -203,3 +248,4 @@ function notify(msg) {
     toast.classList.add('show');
     setTimeout(() => toast.classList.remove('show'), 3000);
 }
+

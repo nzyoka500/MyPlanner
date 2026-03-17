@@ -4,19 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MyPlanner</title>
-    <!-- Favicon -->
-    <link rel="icon" href="favicon.ico" type="image/x-icon">
-
-    <!-- Bootstrap CDN -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
-
-
-    <!-- Modern Typography & Icons -->
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Modern Typography: Plus Jakarta Sans -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Material Icons Round -->
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
 
     <!-- Custom Styles -->
@@ -24,17 +18,18 @@
 </head>
 <body>
 
-    <!-- Mobile Navigation Overlay -->
+    <!-- Overlay for Mobile Sidebar -->
     <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
 
     <div class="app-shell">
-        <!-- Navigation Sidebar -->
+        <!-- Sidebar Navigation Drawer -->
         <aside class="drawer" id="sideDrawer">
             <div class="drawer-header">
                 <div class="logo-box">
                     <span class="material-icons-round">auto_graph</span>
                 </div>
                 <span class="logo-text">MyPlanner</span>
+                <!-- Mobile only close button -->
                 <button class="mobile-close-btn" onclick="toggleSidebar()">
                     <!-- <span class="material-icons-round">close</span> -->
                 </button>
@@ -56,6 +51,7 @@
                 </button>
             </nav>
 
+            <!-- Bottom Stats Section -->
             <div class="drawer-footer">
                 <div class="stat-card">
                     <div class="stat-header">
@@ -69,7 +65,7 @@
             </div>
         </aside>
 
-        <!-- Main Content Area -->
+        <!-- Main Workspace -->
         <main class="main-workspace">
             <header class="top-header">
                 <div class="header-left">
@@ -78,7 +74,7 @@
                     </button>
                     <div class="search-bar">
                         <span class="material-icons-round">search</span>
-                        <input type="text" id="searchInput" placeholder="Search anything...">
+                        <input type="text" id="searchInput" placeholder="Search tasks, goals...">
                         <kbd class="shortcut-hint">/</kbd>
                     </div>
                 </div>
@@ -102,7 +98,7 @@
                     </div>
                 </div>
 
-                <!-- Empty State Message -->
+                <!-- Empty State -->
                 <div id="emptyState" class="empty-ui">
                     <div class="empty-illustration">
                         <span class="material-icons-round">description</span>
@@ -111,19 +107,17 @@
                     <p>Start your day by adding a new task or goal.</p>
                 </div>
 
-                <!-- Responsive Task Grid -->
-                <div id="taskGrid" class="task-grid">
-                    <!-- Tasks injected by script.js -->
-                </div>
+                <!-- Main Task Grid -->
+                <div id="taskGrid" class="task-grid"></div>
             </div>
         </main>
     </div>
 
-    <!-- Multi-purpose Modal -->
+    <!-- Universal Modal System -->
     <div id="universalModal" class="modal-backdrop">
         <div class="modal-box">
 
-            <!-- View Mode (Reading Details) -->
+            <!-- MODE 1: View Mode (Reading Details) -->
             <div id="viewMode" class="modal-view">
                 <div class="modal-top">
                     <span class="tag-priority" id="viewPriority">High</span>
@@ -134,12 +128,13 @@
                 
                 <h2 id="viewTitleText" class="view-title">Task Title</h2>
 
+                <!-- Property Bar for Metadata -->
                 <div class="view-meta-bar">
                     <div class="meta-item">
                         <span class="material-icons-round">calendar_today</span>
                         <div class="meta-text">
                             <label>Due Date</label>
-                            <span id="viewDateText">Oct 24, 2023</span>
+                            <span id="viewDateText">Select Date</span>
                         </div>
                     </div>
                     <div class="meta-separator"></div>
@@ -147,7 +142,7 @@
                         <span class="material-icons-round">layers</span>
                         <div class="meta-text">
                             <label>Category</label>
-                            <span id="viewTypeText">Long-term Goal</span>
+                            <span id="viewTypeText">Category</span>
                         </div>
                     </div>
                 </div>
@@ -167,7 +162,7 @@
                 </div>
             </div>
 
-            <!-- Form Mode (Adding/Editing) -->
+            <!-- MODE 2: Form Mode (Adding/Editing) -->
             <form id="taskForm" class="modal-form hidden">
                 <div class="modal-top">
                     <h2 id="formTitle">Add New Task</h2>
@@ -211,21 +206,17 @@
                 </div>
                 
                 <div class="modal-actions">
-                    <button type="button" class="btn-secondary" onclick="closeModal()">Cancel</button>
+                    <button type="button" class="btn-secondary-flat" onclick="closeModal()">Cancel</button>
                     <button type="submit" class="btn-primary">
                         <span class="material-icons-round">check</span>
                         Save Entry
                     </button>
                 </div>
             </form>
-           
-            
-
-            
         </div>
     </div>
 
-    <!-- Toast Notification -->
+    <!-- Feedback Notification -->
     <div id="toast" class="toast-popup">Action completed</div>
 
     <script src="script.js"></script>
