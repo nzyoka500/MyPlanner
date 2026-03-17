@@ -5,6 +5,7 @@
 
 <!-- Screen images -->
 ![MyPlanner Dashboad](/images/dashboard.png)
+![MyPlanner Active](/images/active.png)
 
 
 ## Key Features
@@ -37,7 +38,7 @@
 - **Fonts & Icons:** Plus Jakarta Sans (Typography) and Material Icons Round (Visuals).
 
 
-## 📂 Project Structure
+## Project Structure
 
 ```text
 MyPlanner/
@@ -49,7 +50,7 @@ MyPlanner/
 └── README.md     # Documentation
 ```
 
-## 📖 Usage Guide
+## Usage Guide
 
 - **Adding a Task:** Click the **"New Task"** button (or the `+` icon on mobile) to open the creation modal.
 - **Viewing Details:** Click on any task card to open the **Detail View** modal to read full notes.
@@ -57,7 +58,7 @@ MyPlanner/
 - **Search:** Start typing in the search bar or use the `/` shortcut to find specific items instantly.
 - **Completion:** Click the radio icon on any card to mark it as complete.
 
----
+
 
 ## Design 
 
@@ -66,9 +67,9 @@ The application follows the **"Focus & Flow"** philosophy:
 2. **Visual Hierarchy:** Important tasks (High Priority) stand out using tonal color palettes.
 3. **Feedback:** Every action (save, delete, complete) triggers a visual feedback (Toast or Animation) to confirm the action.
 
----
 
-## Requirements Checklist (Project Submission)
+
+## Project Submission - Checklist
 
 - **Responsive Layout:** Works on Desktop, Tablet, and Mobile.
 - **Task Input:** Title, Date, Priority, and Description fields included.
