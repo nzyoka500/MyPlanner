@@ -3,94 +3,165 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MyPlanner | Productivity Dashboard</title>
+    <title>MyPlanner Pro | Intelligence Dashboard</title>
+    <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
-    <!-- Google Fonts & Icons -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <div class="app-container">
-        <!-- Sidebar -->
-        <aside class="sidebar">
-            <div class="logo">
-                <i class="fas fa-check-double"></i>
-                <span>MyPlanner</span>
-            </div>
-            <nav>
-                <button class="nav-btn active" data-filter="all"><i class="fas fa-th-large"></i> All Tasks</button>
-                <button class="nav-btn" data-filter="pending"><i class="fas fa-clock"></i> Pending</button>
-                <button class="nav-btn" data-filter="completed"><i class="fas fa-check-circle"></i> Completed</button>
-            </nav>
-            <div class="stats-card">
-                <h4>Progress</h4>
-                <div class="progress-container">
-                    <div class="progress-bar" id="progressBar"></div>
+
+    <div class="app-layout">
+        <!-- Navigation Drawer -->
+        <aside class="drawer">
+            <div class="drawer-header">
+                <div class="logo-box">
+                    <span class="material-icons-round">verified</span>
                 </div>
-                <p id="progressText">0% Completed</p>
+                <span class="logo-text">MyPlanner</span>
+            </div>
+
+            <nav class="drawer-nav">
+                <button class="nav-link active" data-filter="all">
+                    <span class="material-icons-round">grid_view</span> All Items
+                </button>
+                <button class="nav-link" data-filter="pending">
+                    <span class="material-icons-round">radio_button_unchecked</span> Active Tasks
+                </button>
+                <button class="nav-link" data-filter="completed">
+                    <span class="material-icons-round">check_circle</span> Completed
+                </button>
+            </nav>
+
+            <div class="drawer-footer">
+                <div class="progress-widget">
+                    <div class="widget-head">
+                        <span>Completion</span>
+                        <b id="progressValue">0%</b>
+                    </div>
+                    <div class="progress-rail">
+                        <div id="progressBar" class="progress-track"></div>
+                    </div>
+                </div>
             </div>
         </aside>
 
-        <!-- Main Content -->
-        <main class="main-content">
-            <header>
-                <h1>Welcome Back!</h1>
-                <p id="currentDate"></p>
+        <!-- Main Workspace -->
+        <main class="workspace">
+            <!-- Professional Search Header -->
+            <header class="search-header">
+                <div class="search-container">
+                    <span class="material-icons-round search-icon">search</span>
+                    <input type="text" id="searchInput" placeholder="Search your tasks, goals, or notes...">
+                    <kbd>/</kbd>
+                </div>
+                <div class="header-actions">
+                    <span id="headerDate"></span>
+                    <button class="add-fab-mini" onclick="openFormModal()">
+                        <span class="material-icons-round">add</span>
+                    </button>
+                </div>
             </header>
 
-            <div class="grid-layout">
-                <!-- Task Input Section -->
-                <section class="input-section card">
-                    <h3><i class="fas fa-plus-circle"></i> Create New</h3>
-                    <form id="taskForm">
-                        <div class="form-group">
-                            <input type="text" id="taskTitle" placeholder="Task or Goal Title" required>
-                        </div>
-                        <div class="form-row">
-                            <input type="date" id="taskDate" required>
-                            <select id="taskPriority">
-                                <option value="low">Low</option>
-                                <option value="medium" selected>Medium</option>
-                                <option value="high">High</option>
-                            </select>
-                        </div>
-                        <div class="form-row">
-                            <select id="itemType">
-                                <option value="task">Daily Task</option>
-                                <option value="goal">Long-term Goal</option>
-                            </select>
-                            <button type="submit" class="btn-primary">Add to List</button>
-                        </div>
-                    </form>
-                </section>
+            <div class="content-scroll">
+                <div class="view-header">
+                    <h1 id="viewTitle">My Dashboard</h1>
+                    <div class="chip-group">
+                        <span class="badge" id="countBadge">0 Items</span>
+                    </div>
+                </div>
 
-                <!-- Tasks List Section -->
-                <section class="list-section">
-                    <div class="section-header">
-                        <h3>Your Timeline</h3>
-                        <div class="filters">
-                            <span class="active-filter-text">Showing: All Items</span>
-                        </div>
+                <!-- Task Grid -->
+                <div id="taskGrid" class="task-grid">
+                    <!-- Dynamic Content -->
+                </div>
+
+                <!-- Empty State -->
+                <div id="emptyState" class="empty-state">
+                    <div class="empty-icon-box">
+                        <span class="material-icons-round">auto_awesome</span>
                     </div>
-                    <div id="taskList" class="task-grid">
-                        <!-- Tasks will be injected here -->
-                    </div>
-                </section>
+                    <h2>Clear as day</h2>
+                    <p>No tasks found. Relax or add a new goal to get started.</p>
+                </div>
             </div>
         </main>
     </div>
 
-    <!-- Edit Modal -->
-    <div id="editModal" class="modal">
-        <div class="modal-content">
-            <h3>Edit Task</h3>
-            <input type="text" id="editTitle">
-            <div class="modal-actions">
-                <button onclick="closeModal()" class="btn-secondary">Cancel</button>
-                <button id="saveEdit" class="btn-primary">Save Changes</button>
+    <!-- Universal Modal (View/Create/Edit) -->
+    <div id="mainModal" class="modal-overlay">
+        <div class="modal-container">
+            <!-- View Mode -->
+            <div id="viewMode" class="modal-content">
+                <div class="modal-header">
+                    <span class="priority-chip" id="viewPriority">High</span>
+                    <button class="icon-btn" onclick="closeModal()"><span class="material-icons-round">close</span></button>
+                </div>
+                <h2 id="viewTitleText">Task Title</h2>
+                <div class="meta-info">
+                    <span class="meta-item"><span class="material-icons-round">event</span> <span id="viewDateText"></span></span>
+                    <span class="meta-item"><span class="material-icons-round">category</span> <span id="viewTypeText"></span></span>
+                </div>
+                <div class="description-view">
+                    <p id="viewDescText"></p>
+                </div>
+                <div class="modal-footer">
+                    <button id="viewDeleteBtn" class="btn-outline-danger">Delete</button>
+                    <button id="viewEditBtn" class="btn-filled">Edit Details</button>
+                </div>
             </div>
+
+            <!-- Form Mode (Create/Edit) -->
+            <form id="taskForm" class="modal-content hidden">
+                <div class="modal-header">
+                    <h3>Planner Details</h3>
+                    <button type="button" class="icon-btn" onclick="closeModal()"><span class="material-icons-round">close</span></button>
+                </div>
+                
+                <div class="form-body">
+                    <div class="input-group">
+                        <label>Title</label>
+                        <input type="text" id="taskTitle" placeholder="e.g. Design Presentation" required>
+                    </div>
+                    <div class="input-group">
+                        <label>Description (Optional)</label>
+                        <textarea id="taskDesc" rows="3" placeholder="Add notes, links, or sub-tasks..."></textarea>
+                    </div>
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label>Due Date</label>
+                            <input type="date" id="taskDate" required>
+                        </div>
+                        <div class="input-group">
+                            <label>Priority</label>
+                            <select id="taskPriority">
+                                <option value="Low">Low</option>
+                                <option value="Medium" selected>Medium</option>
+                                <option value="High">High</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label>Type</label>
+                        <div class="segmented-control">
+                            <input type="radio" name="itemType" value="Task" id="typeTask" checked>
+                            <label for="typeTask">Daily Task</label>
+                            <input type="radio" name="itemType" value="Goal" id="typeGoal">
+                            <label for="typeGoal">Long-term Goal</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn-text" onclick="closeModal()">Cancel</button>
+                    <button type="submit" class="btn-filled">Save to Planner</button>
+                </div>
+            </form>
         </div>
     </div>
+
+    <!-- Notification Toast -->
+    <div id="snackbar">Action completed!</div>
 
     <script src="script.js"></script>
 </body>
