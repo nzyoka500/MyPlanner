@@ -122,29 +122,60 @@
     <!-- Multi-purpose Modal -->
     <div id="universalModal" class="modal-backdrop">
         <div class="modal-box">
-            <!-- View Mode -->
+
+            <!-- View Mode (Reading Details) -->
             <div id="viewMode" class="modal-view">
                 <div class="modal-top">
                     <span class="tag-priority" id="viewPriority">High</span>
-                    <button class="close-icon" onclick="closeModal()"><span class="material-icons-round">close</span></button>
+                    <button class="close-icon" onclick="closeModal()" aria-label="Close Modal">
+                        <span class="material-icons-round">close</span>
+                    </button>
                 </div>
-                <h2 id="viewTitleText">Task Title</h2>
-                <div class="view-meta">
-                    <div class="meta-item"><span class="material-icons-round">calendar_today</span> <span id="viewDateText"></span></div>
-                    <div class="meta-item"><span class="material-icons-round">flag</span> <span id="viewTypeText"></span></div>
+                
+                <h2 id="viewTitleText" class="view-title">Task Title</h2>
+
+                <div class="view-meta-bar">
+                    <div class="meta-item">
+                        <span class="material-icons-round">calendar_today</span>
+                        <div class="meta-text">
+                            <label>Due Date</label>
+                            <span id="viewDateText">Oct 24, 2023</span>
+                        </div>
+                    </div>
+                    <div class="meta-separator"></div>
+                    <div class="meta-item">
+                        <span class="material-icons-round">layers</span>
+                        <div class="meta-text">
+                            <label>Category</label>
+                            <span id="viewTypeText">Long-term Goal</span>
+                        </div>
+                    </div>
                 </div>
-                <div class="view-description" id="viewDescText"></div>
+
+                <div class="view-content-label">Notes & Description</div>
+                <div class="view-description-box" id="viewDescText"></div>
+
                 <div class="modal-actions">
-                    <button id="viewDeleteBtn" class="btn-danger-text">Remove</button>
-                    <button id="viewEditBtn" class="btn-primary">Edit Details</button>
+                    <button id="viewDeleteBtn" class="btn-danger-text">
+                        <span class="material-icons-round">delete_outline</span>
+                        Delete
+                    </button>
+                    <button id="viewEditBtn" class="btn-primary">
+                        <span class="material-icons-round">edit</span>
+                        Edit Details
+                    </button>
                 </div>
             </div>
 
-            <!-- Form Mode -->
+            <!-- Form Mode (Adding/Editing) -->
             <form id="taskForm" class="modal-form hidden">
-                <div class="modal-top card-title mb-3">
+                <div class="modal-top">
                     <h2 id="formTitle">Add New Task</h2>
+                    <button type="button" class="close-icon" onclick="closeModal()">
+                        <span class="material-icons-round">close</span>
+                    </button>
                 </div>
+                
                 <div class="form-grid">
                     <div class="field">
                         <label>Task Title</label>
@@ -178,11 +209,19 @@
                         </div>
                     </div>
                 </div>
+                
                 <div class="modal-actions">
-                    <button type="button" class="btn btn-sm btn-secondary" onclick="closeModal()">Cancel</button>
-                    <button type="submit" class="btn btn-sm btn-primary">Save</button>
+                    <button type="button" class="btn-secondary" onclick="closeModal()">Cancel</button>
+                    <button type="submit" class="btn-primary">
+                        <span class="material-icons-round">check</span>
+                        Save Entry
+                    </button>
                 </div>
             </form>
+           
+            
+
+            
         </div>
     </div>
 
