@@ -3,136 +3,156 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MyPlanner Pro | Intelligence Dashboard</title>
-    <!-- Fonts & Icons -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <title>MyPlanner</title>
+    <!-- Favicon -->
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+
+    <!-- Modern Typography & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+
+    <!-- Custom Styles -->
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
-    <div class="app-layout">
-        <!-- Navigation Drawer -->
-        <aside class="drawer">
+    <!-- Mobile Navigation Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+    <div class="app-shell">
+        <!-- Navigation Sidebar -->
+        <aside class="drawer" id="sideDrawer">
             <div class="drawer-header">
                 <div class="logo-box">
-                    <span class="material-icons-round">verified</span>
+                    <span class="material-icons-round">auto_graph</span>
                 </div>
                 <span class="logo-text">MyPlanner</span>
+                <button class="mobile-close-btn" onclick="toggleSidebar()">
+                    <span class="material-icons-round">close</span>
+                </button>
             </div>
 
             <nav class="drawer-nav">
-                <button class="nav-link active" data-filter="all">
-                    <span class="material-icons-round">grid_view</span> All Items
+                <p class="nav-section-label">WORKSPACE</p>
+                <button class="nav-item active" data-filter="all" onclick="handleNavClick(this)">
+                    <span class="material-icons-round">dashboard</span>
+                    <span class="nav-text">All Items</span>
                 </button>
-                <button class="nav-link" data-filter="pending">
-                    <span class="material-icons-round">radio_button_unchecked</span> Active Tasks
+                <button class="nav-item" data-filter="pending" onclick="handleNavClick(this)">
+                    <span class="material-icons-round">radio_button_unchecked</span>
+                    <span class="nav-text">Active Tasks</span>
                 </button>
-                <button class="nav-link" data-filter="completed">
-                    <span class="material-icons-round">check_circle</span> Completed
+                <button class="nav-item" data-filter="completed" onclick="handleNavClick(this)">
+                    <span class="material-icons-round">check_circle</span>
+                    <span class="nav-text">Completed</span>
                 </button>
             </nav>
 
             <div class="drawer-footer">
-                <div class="progress-widget">
-                    <div class="widget-head">
-                        <span>Completion</span>
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <span>Overall Progress</span>
                         <b id="progressValue">0%</b>
                     </div>
-                    <div class="progress-rail">
-                        <div id="progressBar" class="progress-track"></div>
+                    <div class="progress-bar-bg">
+                        <div id="progressBar" class="progress-bar-fill"></div>
                     </div>
                 </div>
             </div>
         </aside>
 
-        <!-- Main Workspace -->
-        <main class="workspace">
-            <!-- Professional Search Header -->
-            <header class="search-header">
-                <div class="search-container">
-                    <span class="material-icons-round search-icon">search</span>
-                    <input type="text" id="searchInput" placeholder="Search your tasks, goals, or notes...">
-                    <kbd>/</kbd>
+        <!-- Main Content Area -->
+        <main class="main-workspace">
+            <header class="top-header">
+                <div class="header-left">
+                    <button class="menu-toggle" onclick="toggleSidebar()">
+                        <span class="material-icons-round">menu</span>
+                    </button>
+                    <div class="search-bar">
+                        <span class="material-icons-round">search</span>
+                        <input type="text" id="searchInput" placeholder="Search anything...">
+                        <kbd class="shortcut-hint">/</kbd>
+                    </div>
                 </div>
-                <div class="header-actions">
-                    <span id="headerDate"></span>
-                    <button class="add-fab-mini" onclick="openFormModal()">
+                
+                <div class="header-right">
+                    <div class="date-widget">
+                        <span id="headerDate"></span>
+                    </div>
+                    <button class="fab-add" onclick="openFormModal()">
                         <span class="material-icons-round">add</span>
+                        <span class="fab-text">New Task</span>
                     </button>
                 </div>
             </header>
 
-            <div class="content-scroll">
-                <div class="view-header">
-                    <h1 id="viewTitle">My Dashboard</h1>
-                    <div class="chip-group">
-                        <span class="badge" id="countBadge">0 Items</span>
+            <div class="scroll-container">
+                <div class="content-header">
+                    <div>
+                        <h1 id="pageTitle">All Items</h1>
+                        <p id="itemCountLabel" class="text-muted">0 entries found</p>
                     </div>
                 </div>
 
-                <!-- Task Grid -->
+                <!-- Empty State Message -->
+                <div id="emptyState" class="empty-ui">
+                    <div class="empty-illustration">
+                        <span class="material-icons-round">description</span>
+                    </div>
+                    <h2>No items match your view</h2>
+                    <p>Start your day by adding a new task or goal.</p>
+                </div>
+
+                <!-- Responsive Task Grid -->
                 <div id="taskGrid" class="task-grid">
-                    <!-- Dynamic Content -->
-                </div>
-
-                <!-- Empty State -->
-                <div id="emptyState" class="empty-state">
-                    <div class="empty-icon-box">
-                        <span class="material-icons-round">auto_awesome</span>
-                    </div>
-                    <h2>Clear as day</h2>
-                    <p>No tasks found. Relax or add a new goal to get started.</p>
+                    <!-- Tasks injected by script.js -->
                 </div>
             </div>
         </main>
     </div>
 
-    <!-- Universal Modal (View/Create/Edit) -->
-    <div id="mainModal" class="modal-overlay">
-        <div class="modal-container">
+    <!-- Multi-purpose Modal -->
+    <div id="universalModal" class="modal-backdrop">
+        <div class="modal-box">
             <!-- View Mode -->
-            <div id="viewMode" class="modal-content">
-                <div class="modal-header">
-                    <span class="priority-chip" id="viewPriority">High</span>
-                    <button class="icon-btn" onclick="closeModal()"><span class="material-icons-round">close</span></button>
+            <div id="viewMode" class="modal-view">
+                <div class="modal-top">
+                    <span class="tag-priority" id="viewPriority">High</span>
+                    <button class="close-icon" onclick="closeModal()"><span class="material-icons-round">close</span></button>
                 </div>
                 <h2 id="viewTitleText">Task Title</h2>
-                <div class="meta-info">
-                    <span class="meta-item"><span class="material-icons-round">event</span> <span id="viewDateText"></span></span>
-                    <span class="meta-item"><span class="material-icons-round">category</span> <span id="viewTypeText"></span></span>
+                <div class="view-meta">
+                    <div class="meta-item"><span class="material-icons-round">calendar_today</span> <span id="viewDateText"></span></div>
+                    <div class="meta-item"><span class="material-icons-round">flag</span> <span id="viewTypeText"></span></div>
                 </div>
-                <div class="description-view">
-                    <p id="viewDescText"></p>
-                </div>
-                <div class="modal-footer">
-                    <button id="viewDeleteBtn" class="btn-outline-danger">Delete</button>
-                    <button id="viewEditBtn" class="btn-filled">Edit Details</button>
+                <div class="view-description" id="viewDescText"></div>
+                <div class="modal-actions">
+                    <button id="viewDeleteBtn" class="btn-danger-text">Remove</button>
+                    <button id="viewEditBtn" class="btn-primary">Edit Details</button>
                 </div>
             </div>
 
-            <!-- Form Mode (Create/Edit) -->
-            <form id="taskForm" class="modal-content hidden">
-                <div class="modal-header">
-                    <h3>Planner Details</h3>
-                    <button type="button" class="icon-btn" onclick="closeModal()"><span class="material-icons-round">close</span></button>
+            <!-- Form Mode -->
+            <form id="taskForm" class="modal-form hidden">
+                <div class="modal-top">
+                    <h3>Entry Details</h3>
+                    <button type="button" class="close-icon" onclick="closeModal()"><span class="material-icons-round">close</span></button>
                 </div>
-                
-                <div class="form-body">
-                    <div class="input-group">
-                        <label>Title</label>
-                        <input type="text" id="taskTitle" placeholder="e.g. Design Presentation" required>
+                <div class="form-grid">
+                    <div class="field">
+                        <label>Task Title</label>
+                        <input type="text" id="taskTitle" placeholder="What needs doing?" required maxlength="50">
                     </div>
-                    <div class="input-group">
-                        <label>Description (Optional)</label>
-                        <textarea id="taskDesc" rows="3" placeholder="Add notes, links, or sub-tasks..."></textarea>
+                    <div class="field">
+                        <label>Description (Notes)</label>
+                        <textarea id="taskDesc" rows="3" placeholder="Add any extra details..."></textarea>
                     </div>
-                    <div class="input-row">
-                        <div class="input-group">
+                    <div class="field-row">
+                        <div class="field">
                             <label>Due Date</label>
                             <input type="date" id="taskDate" required>
                         </div>
-                        <div class="input-group">
+                        <div class="field">
                             <label>Priority</label>
                             <select id="taskPriority">
                                 <option value="Low">Low</option>
@@ -141,27 +161,26 @@
                             </select>
                         </div>
                     </div>
-                    <div class="input-group">
-                        <label>Type</label>
-                        <div class="segmented-control">
-                            <input type="radio" name="itemType" value="Task" id="typeTask" checked>
-                            <label for="typeTask">Daily Task</label>
-                            <input type="radio" name="itemType" value="Goal" id="typeGoal">
-                            <label for="typeGoal">Long-term Goal</label>
+                    <div class="field">
+                        <label>Category</label>
+                        <div class="type-selector">
+                            <input type="radio" name="itemType" value="Task" id="catTask" checked>
+                            <label for="catTask">Daily Task</label>
+                            <input type="radio" name="itemType" value="Goal" id="catGoal">
+                            <label for="catGoal">Long-term Goal</label>
                         </div>
                     </div>
                 </div>
-
-                <div class="modal-footer">
-                    <button type="button" class="btn-text" onclick="closeModal()">Cancel</button>
-                    <button type="submit" class="btn-filled">Save to Planner</button>
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary" onclick="closeModal()">Cancel</button>
+                    <button type="submit" class="btn-primary">Save to Planner</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- Notification Toast -->
-    <div id="snackbar">Action completed!</div>
+    <!-- Toast Notification -->
+    <div id="toast" class="toast-popup">Action completed</div>
 
     <script src="script.js"></script>
 </body>

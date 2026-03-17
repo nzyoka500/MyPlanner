@@ -3,61 +3,95 @@
  */
 
 let state = {
-    items: JSON.parse(localStorage.getItem('myplanner_pro_db')) || [],
+    items: JSON.parse(localStorage.getItem('myplanner_v2_db')) || [],
     filter: 'all',
-    searchQuery: '',
+    search: '',
     editingId: null
 };
 
-// --- Initialization ---
 document.addEventListener('DOMContentLoaded', () => {
+    initApp();
     render();
-    initClock();
-    setupListeners();
 });
 
-function initClock() {
+function initApp() {
+    // Set current date
     const options = { weekday: 'long', month: 'short', day: 'numeric' };
     document.getElementById('headerDate').innerText = new Date().toLocaleDateString('en-US', options);
+
+    // Form submission
+    document.getElementById('taskForm').addEventListener('submit', handleFormSubmit);
+
+    // Real-time Search
+    document.getElementById('searchInput').addEventListener('input', (e) => {
+        state.search = e.target.value.toLowerCase();
+        render();
+    });
+
+    // Keyboard Shortcut (/)
+    window.addEventListener('keydown', (e) => {
+        if(e.key === '/' && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
+            e.preventDefault();
+            document.getElementById('searchInput').focus();
+        }
+    });
 }
 
-// --- Rendering Engine ---
+// Sidebar Controls
+function toggleSidebar() {
+    document.getElementById('sideDrawer').classList.toggle('active');
+    document.getElementById('sidebarOverlay').classList.toggle('active');
+}
+
+function handleNavClick(btn) {
+    document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+    btn.classList.add('active');
+    state.filter = btn.dataset.filter;
+    document.getElementById('pageTitle').innerText = btn.querySelector('.nav-text').innerText;
+    render();
+    if(window.innerWidth <= 1024) toggleSidebar();
+}
+
+// Rendering Core
 function render() {
     const grid = document.getElementById('taskGrid');
     const emptyState = document.getElementById('emptyState');
     grid.innerHTML = '';
 
-    // Filter Logic
-    let filtered = state.items.filter(item => {
-        const matchesFilter = 
-            state.filter === 'all' ? true :
-            state.filter === 'pending' ? !item.completed :
-            item.completed;
-        
-        const matchesSearch = item.title.toLowerCase().includes(state.searchQuery.toLowerCase()) || 
-                              item.desc.toLowerCase().includes(state.searchQuery.toLowerCase());
-        
+    const filtered = state.items.filter(item => {
+        const matchesFilter = state.filter === 'all' ? true : 
+                            (state.filter === 'pending' ? !item.completed : item.completed);
+        const matchesSearch = item.title.toLowerCase().includes(state.search) || 
+                             item.desc.toLowerCase().includes(state.search);
         return matchesFilter && matchesSearch;
     });
 
     if (filtered.length === 0) {
         emptyState.style.display = 'flex';
+        grid.style.display = 'none';
     } else {
-        emptyState.style.display = 'grid';
+        emptyState.style.display = 'none';
+        grid.style.display = 'grid';
+        
         filtered.forEach(item => {
             const card = document.createElement('div');
             card.className = `task-card ${item.completed ? 'done' : ''}`;
             card.innerHTML = `
-                <div class="priority-chip ${item.priority}">${item.priority}</div>
-                <h3>${item.title}</h3>
-                <p class="task-desc-preview">${item.desc || 'No additional notes...'}</p>
-                <div class="card-footer" style="display:flex; justify-content:space-between; align-items:center;">
-                    <span style="font-size:0.75rem; color:var(--text-muted)">
-                        <span class="material-icons-round" style="font-size:14px; vertical-align:text-bottom">calendar_today</span>
+                <span class="tag-priority ${item.priority}">${item.priority}</span>
+                <h3 style="margin-bottom:8px">${item.title}</h3>
+                <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:1.5rem; line-height:1.4; height:2.8rem; overflow:hidden;">
+                    ${item.desc || 'No detailed notes provided.'}
+                </p>
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <div style="display:flex; align-items:center; gap:6px; font-size:0.75rem; color:var(--text-muted)">
+                        <span class="material-icons-round" style="font-size:16px">event</span>
                         ${item.date}
-                    </span>
-                    <button class="icon-btn" onclick="event.stopPropagation(); toggleComplete(${item.id})">
-                        <span class="material-icons-round">${item.completed ? 'check_circle' : 'radio_button_unchecked'}</span>
+                    </div>
+                    <button class="status-btn" onclick="event.stopPropagation(); toggleStatus(${item.id})" 
+                            style="border:none; background:none; cursor:pointer;">
+                        <span class="material-icons-round" style="color:${item.completed ? 'var(--primary)' : '#cbd5e1'}">
+                            ${item.completed ? 'check_circle' : 'radio_button_unchecked'}
+                        </span>
                     </button>
                 </div>
             `;
@@ -65,13 +99,14 @@ function render() {
             grid.appendChild(card);
         });
     }
-    updateStats();
+
+    updateStats(filtered.length);
 }
 
-// --- Core Actions ---
-function saveItem(e) {
+// CRUD Actions
+function handleFormSubmit(e) {
     e.preventDefault();
-    const formData = {
+    const data = {
         title: document.getElementById('taskTitle').value,
         desc: document.getElementById('taskDesc').value,
         date: document.getElementById('taskDate').value,
@@ -80,16 +115,21 @@ function saveItem(e) {
     };
 
     if(state.editingId) {
-        state.items = state.items.map(i => i.id === state.editingId ? {...i, ...formData} : i);
-        showToast("Entry updated successfully");
+        state.items = state.items.map(i => i.id === state.editingId ? {...i, ...data} : i);
+        notify("Entry updated");
     } else {
-        const newItem = { id: Date.now(), ...formData, completed: false };
-        state.items.unshift(newItem);
-        showToast("New task added to planner");
+        state.items.unshift({ id: Date.now(), ...data, completed: false });
+        notify("Task added successfully");
     }
 
     sync();
     closeModal();
+}
+
+function toggleStatus(id) {
+    state.items = state.items.map(i => i.id === id ? {...i, completed: !i.completed} : i);
+    sync();
+    notify("Status updated");
 }
 
 function deleteItem(id) {
@@ -97,112 +137,69 @@ function deleteItem(id) {
         state.items = state.items.filter(i => i.id !== id);
         sync();
         closeModal();
-        showToast("Deleted");
+        notify("Item removed");
     }
 }
 
-function toggleComplete(id) {
-    state.items = state.items.map(i => i.id === id ? {...i, completed: !i.completed} : i);
-    sync();
-    showToast("Status updated");
-}
-
-// --- Modal Control ---
-const modal = document.getElementById('mainModal');
-const viewMode = document.getElementById('viewMode');
-const formMode = document.getElementById('taskForm');
+// Modal Logic
+const modal = document.getElementById('universalModal');
+const vMode = document.getElementById('viewMode');
+const fMode = document.getElementById('taskForm');
 
 function openFormModal(id = null) {
     state.editingId = id;
-    viewMode.classList.add('hidden');
-    formMode.classList.remove('hidden');
-    
+    vMode.classList.add('hidden');
+    fMode.classList.remove('hidden');
     if(id) {
         const item = state.items.find(i => i.id === id);
         document.getElementById('taskTitle').value = item.title;
         document.getElementById('taskDesc').value = item.desc;
         document.getElementById('taskDate').value = item.date;
         document.getElementById('taskPriority').value = item.priority;
-    } else {
-        formMode.reset();
-    }
+    } else { fMode.reset(); }
     modal.style.display = 'flex';
 }
 
 function openViewModal(id) {
     const item = state.items.find(i => i.id === id);
     state.editingId = id;
-    
     document.getElementById('viewTitleText').innerText = item.title;
-    document.getElementById('viewDescText').innerText = item.desc || "No description provided.";
+    document.getElementById('viewDescText').innerText = item.desc || "No additional notes.";
     document.getElementById('viewDateText').innerText = item.date;
     document.getElementById('viewTypeText').innerText = item.type;
-    const pChip = document.getElementById('viewPriority');
-    pChip.innerText = item.priority;
-    pChip.className = `priority-chip ${item.priority}`;
+    const chip = document.getElementById('viewPriority');
+    chip.innerText = item.priority;
+    chip.className = `tag-priority ${item.priority}`;
 
-    // Setup actions
     document.getElementById('viewDeleteBtn').onclick = () => deleteItem(id);
     document.getElementById('viewEditBtn').onclick = () => openFormModal(id);
 
-    formMode.classList.add('hidden');
-    viewMode.classList.remove('hidden');
+    fMode.classList.add('hidden');
+    vMode.classList.remove('hidden');
     modal.style.display = 'flex';
 }
 
-function closeModal() {
-    modal.style.display = 'none';
-}
+function closeModal() { modal.style.display = 'none'; }
 
-// --- Helpers ---
+// Helpers
 function sync() {
-    localStorage.setItem('myplanner_pro_db', JSON.stringify(state.items));
+    localStorage.setItem('myplanner_v2_db', JSON.stringify(state.items));
     render();
 }
 
-function updateStats() {
+function updateStats(filteredCount) {
     const total = state.items.length;
-    const done = state.items.filter(i => i.completed).length;
-    const pct = total === 0 ? 0 : Math.round((done / total) * 100);
+    const completed = state.items.filter(i => i.completed).length;
+    const pct = total === 0 ? 0 : Math.round((completed / total) * 100);
     
     document.getElementById('progressBar').style.width = pct + '%';
     document.getElementById('progressValue').innerText = pct + '%';
-    document.getElementById('countBadge').innerText = `${total} Items Total`;
+    document.getElementById('itemCountLabel').innerText = `${filteredCount} items matching criteria`;
 }
 
-function showToast(msg) {
-    const s = document.getElementById("snackbar");
-    s.innerText = msg;
-    s.className = "show";
-    setTimeout(() => s.className = s.className.replace("show", ""), 3000);
-}
-
-function setupListeners() {
-    // Form Submit
-    formMode.addEventListener('submit', saveItem);
-
-    // Filter Buttons
-    document.querySelectorAll('.nav-link').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            document.querySelector('.nav-link.active').classList.remove('active');
-            e.currentTarget.classList.add('active');
-            state.filter = e.currentTarget.dataset.filter;
-            document.getElementById('viewTitle').innerText = e.currentTarget.innerText;
-            render();
-        });
-    });
-
-    // Search Logic
-    document.getElementById('searchInput').addEventListener('input', (e) => {
-        state.searchQuery = e.target.value;
-        render();
-    });
-
-    // Shortcut for Search
-    window.addEventListener('keydown', (e) => {
-        if(e.key === '/') {
-            e.preventDefault();
-            document.getElementById('searchInput').focus();
-        }
-    });
+function notify(msg) {
+    const toast = document.getElementById('toast');
+    toast.innerText = msg;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 3000);
 }
