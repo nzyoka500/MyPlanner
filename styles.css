@@ -201,6 +201,38 @@ body {
   gap: 1.5rem;
 }
 
+/* --- Header & Search Updates --- */
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    flex: 1; /* Allows this side to grow */
+}
+
+.search-bar {
+    background: #f1f5f9;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    padding: 0 1rem;
+    width: 100%;
+    max-width: 500px; /* Search bar is now responsive and larger */
+    transition: all 0.3s ease;
+}
+
+.search-bar:focus-within {
+    background: white;
+    box-shadow: 0 0 0 2px var(--primary);
+    max-width: 550px; /* Slight expansion effect on focus */
+}
+
+/* --- Visibility Logic: Hide Mobile elements on Web --- */
+.menu-toggle, 
+.mobile-close-btn {
+    display: none !important; 
+}
+
+
 /* Cards Styling */
 .task-card {
   background: white;
@@ -558,4 +590,64 @@ body {
   .date-widget {
     display: none;
   }
+}
+
+/* ============================================================
+   RESPONSIVE UPDATES
+   ============================================================ */
+
+/* TABLET & MOBILE VIEW (Below 1024px) */
+@media (max-width: 1024px) {
+    /* Show the toggle button ONLY on mobile/tablet */
+    .menu-toggle {
+        display: flex !important;
+        background: #f1f5f9;
+        border: none;
+        padding: 8px;
+        border-radius: 8px;
+        color: var(--primary);
+        cursor: pointer;
+    }
+
+    /* Show the close button ONLY inside the mobile sidebar */
+    .mobile-close-btn {
+        display: flex !important;
+        position: absolute;
+        right: 15px;
+        top: 35px;
+        background: transparent;
+        border: none;
+        color: var(--primary-dark);
+        padding: 4px;
+    }
+
+    .drawer {
+        position: fixed;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        z-index: 2000;
+        transform: translateX(-100%);
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .drawer.active {
+        transform: translateX(0);
+    }
+
+    .search-bar {
+        max-width: 100%; /* Full width on smaller mobile screens */
+    }
+}
+
+/* SMALL MOBILE (Below 640px) */
+@media (max-width: 640px) {
+    .header-right .date-widget, 
+    .shortcut-hint {
+        display: none; /* Hide date and '/' hint on small phones to save space */
+    }
+    
+    .top-header {
+        padding: 0 1rem;
+    }
 }
